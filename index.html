@@ -35,16 +35,15 @@
 				<h1 class="table__title">Зачем что-то учить, Если можно юзать <u>прод</u>?</h1>
 			</div>
 			<div class="table__row df">
-				<div class="table__column df">
+				<div class="table__column table__column_1 df">
 					<div class="table__inner df">
 						<h3 class="title-content">Начальное Значение</h3>
 						<div class="table__in-block">
-							<input class="table__input" id="in" type="text">
-							<div class="system df">
-								<button class="system__button button"><span>2</span></button>
-								<button class="system__button button"><span>8</span></button>
-								<button class="system__button button from"><span>10</span></button>
-								<button class="system__button button"><span>16</span></button>
+							<div class="table__input-block">
+								<input class="table__input" id="in" type="text">
+								<div class="table__ss-block">
+									<input class="table__ss" type="text" id="from">
+								</div>
 							</div>
 						</div>
 						<div class="table__button-block">
@@ -52,15 +51,15 @@
 						</div>
 					</div>
 				</div>
-				<div class="table__column df">
+				<div class="table__column table__column_2 df">
 					<div class="table__inner df">
 						<h3 class="title-content">Конечное Значение</h3>
 						<div class="table__out-block">
 							<div class="system df">
-								<button class="system__button button to"><span>2</span></button>
-								<button class="system__button button"><span>8</span></button>
-								<button class="system__button button"><span>10</span></button>
-								<button class="system__button button"><span>16</span></button>
+								<div class="system__name">Результат</div>
+								<div class="system__ss-block">
+									<input class="system__ss" type="text" id="to">
+								</div>
 							</div>
 						</div>
 						<div class="table__end-block df">
@@ -74,29 +73,30 @@
 					<h3 class="title-content">Калькулятор чисел разных Систем Счистления</h3>
 					<div class="counting__main-system-block">
 						<span class="counting__main-system-label">Система счистления результата</span>
-						<input class="counting__main-system input-count" id="main-system" type="text" value="10">
+						<input class="counting__main-system input-count" id="main-system" type="text">
 					</div>
 				</div>
 				<div class="counting__row df">
 					<div class="counting__number-block df">
 						<div class="counting__number-inner">
-							<input class="counting__num input-count" id="num_1" type="text" value="fd12c.12c">
-							<input class="counting__ss" id="ss_1" type="text" value="16">
+							<input class="counting__num input-count" id="num_1" type="text">
+							<input class="counting__ss" id="ss_1" type="text">
 						</div>
 					</div>
 					<div class="counting__action-block">
-						<input class="counting__action input-count" id="act" type="text" placeholder="+" value="/">
+						<input class="counting__action input-count" id="act" type="text">
 					</div>
 					<div class="counting__number-block df">
 						<div class="counting__number-inner">
-							<input class="counting__num input-count" id="num_2" type="text" value="11">
-							<input class="counting__ss" id="ss_2" type="text" value="8">
+							<input class="counting__num input-count" id="num_2" type="text">
+							<input class="counting__ss" id="ss_2" type="text">
 						</div>
 					</div>
 				</div>
 				<div class="counting__button-block df">
 					<button class="counting__button counting-button" id="count">Посчитать</button>
 					<button class="counting__replace counting-button" id="replace">Поменять местами</button>
+					<button class="counting__clear counting-button" id="clean">Удалить значения</button>
 				</div>
 				<div class="counting__value-block df">
 					<span class="counting__result-word">Ответ: </span>

@@ -2,54 +2,45 @@
 let
 	inp  					= document.getElementById("in"),
 	trueChars  			= ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", ","],
-	symbolChars 		= ["a", "b", "c", "d", "e", "f"],
+	symbolChars 		= ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"],
 	keyboardChars 		= ["backspace", "home", "end", "shift", "arrowleft", "arrowright", "tab", "delete"],
 	actionChars 		= ["+", "-", "*", "×", "⋅", "/", ":"],
 	result 				= document.querySelector(".table__end"),
 	maxSS 				= 2,
-	maxVal 				= 12,
-	maxValIn2 			= 14,
+	maxVal 				= 16,
 	rotateTimeout, copyTimeout, alertTimeout;
 
-let val = localStorage.getItem("val"), from, to;
-
-if(val !== null){
-	from 	= +localStorage.getItem("from");
-	to 	= +localStorage.getItem("to");
-
-	for(let i = 0; i < $(".table__in-block .system__button").length; i++){
-		if(+$(".table__in-block .system__button").eq(i).children("span").text() === from){
-			$(".from").removeClass("from");
-			$(".table__in-block .system__button").eq(i).addClass("from");
-		};
-		if(+$(".table__out-block .system__button").eq(i).children("span").text() === to){
-			$(".to").removeClass("to");
-			$(".table__out-block .system__button").eq(i).addClass("to");
-		};
-	};
-
-	inp.value = val;
-	if(result !== null){
-		result.innerHTML = localStorage.getItem("out");
-	};
+if(localStorage.getItem("small") === "true"){
+	document.querySelector(".table__end-block").classList.add("small-text");
 };
+
+if(localStorage.getItem("val")){			inp.value = localStorage.getItem("val");			};
+if(localStorage.getItem("out1")){		result.innerHTML = localStorage.getItem("out1");};
+if(localStorage.getItem("from")){		$("#from").val(localStorage.getItem("from"));	};
+if(localStorage.getItem("to")){			$("#to").val(localStorage.getItem("to"));			};
+if(localStorage.getItem("num1")){		$("#num_1").val(localStorage.getItem("num1"));	};
+if(localStorage.getItem("ss1")){			$("#ss_1").val(localStorage.getItem("ss1"));		};
+if(localStorage.getItem("num2")){		$("#num_2").val(localStorage.getItem("num2"));	};
+if(localStorage.getItem("ss2")){			$("#ss_2").val(localStorage.getItem("ss2"));		};
+if(localStorage.getItem("act")){			$("#act").val(localStorage.getItem("act"));		};
+if(localStorage.getItem("main-ss")){	$("#main-system").val(localStorage.getItem("main-ss"));};
+
 
 function start(){
 	val 				= inp.value.toLowerCase(),
-	from 				= +$(".from").children("span").text(),
-	to 				= +$(".to").children("span").text(),
+	from 				= +$("#from").val(),
+	to 				= +$("#to").val(),
 	valid 			= checkSystem(val, from),
 	errorMessage 	= [];
 
 	val = val.replaceAll(",", ".");
 	val = deleteZero(val);
 
-	if(val.length > maxVal && from !== maxSS && val.indexOf(".") === -1 ||
-		from === maxSS && val.length > maxValIn2 || val.indexOf(".") !== -1 && val.length > maxValIn2){
-		errorMessage.push(`Число <b>${val}<sub>${from}</sub></b> слишком большое по длине, введите значение короче <b>${maxVal + 1}-и</b> символов.`);
+	if(val.length > maxVal && val.indexOf(".") === -1){
+		errorMessage.push(`Число <b>${val}<sub>${from}</sub></b> слишком большое по длине, введите значение короче <b>${maxVal + 1}</b> символов.`);
 	};
 	if(!valid[0]){
-		errorMessage.push(`Ошибка соответсвия числа <b>${val}<sub>${from}</sub></b> и его системы счистления на <b>${valid[1] + 1}-ом</b> символе</b>.`);
+		errorMessage.push(`Ошибка соответсвия числа <b>${val}<sub>${from}</sub></b> и его системы счистления на <b>${valid[1] + 1}</b> символе (по счёту слева).`);
 	};
 	if(val === ""){
 		errorMessage.push("Введите значение.");
@@ -57,10 +48,17 @@ function start(){
 	if(charLength(val, ",", false) + charLength(val, ".", false) > 1){
 		errorMessage.push(`Ошибка при вводе дробного значения в числе <b>${val}<sub>${from}</sub></b>.`);
 	};
-	if(from < 2 || from > 16 || to < 2 || to > 16){
-		errorMessage.push("Выбери систему счистления в диапозоне от 2 до 16 включительно.");
+	if(from < 2 || from > 36 || to < 2 || to > 36){
+		errorMessage.push("Выбери систему счистления в диапозоне от <b>2</b> до <b>36</b> включительно.");
 	};
-	if(val === "."){errorMessage.push(`Введено бессмысленное значение в поле ввода`);}
+	if(val === "."){errorMessage.push(`Введено бессмысленное значение в поле ввода.`);}
+
+	for(let i = 0; i < val.length; i++){
+		if(!trueChars.includes(val[i]) && !symbolChars.includes(val[i].toLowerCase())){
+			errorMessage.push(`Введено бессмысленное значение в поле ввода с нечитаемым символом на <b>${i + 1}</b> символе (по счёту слева).`);
+			break;
+		};
+	};
 
 	if(errorMessage.length !== 0){
 		error(errorMessage);
@@ -72,12 +70,6 @@ function start(){
 	};
 
 	console.log(val + " " + from + " " + to);
-
-	clearTimeout(rotateTimeout);
-	$(".counting__logo-oracle").addClass("rotated");
-	rotateTimeout = setTimeout(function(){
-		$(".counting__logo-oracle").removeClass("rotated");
-	}, 500);
 
 	let res;
 
@@ -92,7 +84,7 @@ function start(){
 		if(from === 10){
 			res = decimalOut(val, to);
 		} else {
-			res = decimal(val, from);
+			res = decimalOut(decimal(val, from), to);
 		};
 	} else {
 		if(to === 10){
@@ -102,13 +94,28 @@ function start(){
 		};
 	};
 
+	if((res + "").length > 40){
+		$(".table__end-block").addClass("small-text");
+	} else {
+		$(".table__end-block").removeClass("small-text");
+	};
+
+	clearTimeout(rotateTimeout);
+	$(".counting__logo-oracle").addClass("rotated");
+	rotateTimeout = setTimeout(function(){
+		$(".counting__logo-oracle").removeClass("rotated");
+	}, 500);
+
 	result.innerHTML = `<span>${res}</span><sub>${to}</sub>`
 };
 
-inp.addEventListener("keydown", function(e) {
+$(".table__input, .table__ss, .system__ss").on("keyup", function(e){
 	if(e.key == "Enter" && !e.ctrlKey){
 		start();
 	};
+});
+
+inp.addEventListener("keydown", function(e) {
 	if(!trueChars.includes(e.key.toLowerCase()) &&
 		!keyboardChars.includes(e.key.toLowerCase()) &&
 		!symbolChars.includes(e.key.toLowerCase()) &&
@@ -126,66 +133,60 @@ inp.addEventListener("keydown", function(e) {
 			},300);
 		};
 	};
-	if(e.ctrlKey && !e.shiftKey){
-		if(e.key === "ArrowRight"){
-			e.preventDefault();
-			firstChange(1);
-		} else if(e.key === "ArrowLeft"){
-			e.preventDefault();
-			firstChange(0);
-		};
-	};
-	if(e.ctrlKey && e.shiftKey){
-		if(e.key === "ArrowRight"){
-			e.preventDefault();
-			secondChange(1);
-		} else if(e.key === "ArrowLeft"){
-			e.preventDefault();
-			secondChange(0);
-		};
-	};
 });
 
 function firstChange(way){
-	let ind, btn = $(".table__in-block .system__button");
+	let val = +$(".table__ss").val();
+	if(way === "bigger"){
+		if(val === 0){
+			$(".table__ss").val(36);
+			return 0;
+		};
 
-	for(let i = 0; i < btn.length; i++){
-		if(btn.eq(i).hasClass("from")){
-			ind = i;
-			break;
+		if(val < 36){
+			$(".table__ss").val(val + 1);
+		} else {
+			$(".table__ss").val(2);
+		};
+	} else if(way === "smaller"){
+		if(val === 0){
+			$(".table__ss").val(2);
+			return 0;
+		};
+
+		if(val > 2){
+			$(".table__ss").val(val - 1);
+		} else {
+			$(".table__ss").val(36);
 		};
 	};
-
-	$(".from").removeClass("from");
-
-	if(way > 0){
-		ind = ind + 1 !== btn.length ? ind + 1 : 0;
-	} else {
-		ind = ind !== 0 ? ind - 1 : btn.length - 1;
-	};
-
-	btn.eq(ind).addClass("from");
 };
 
 function secondChange(way){
-	let ind, btn = $(".table__out-block .system__button");
+	let val = +$(".system__ss").val();
+	if(way === "bigger"){
+		if(val === 0){
+			$(".system__ss").val(36);
+			return 0;
+		};
 
-	for(let i = 0; i < btn.length; i++){
-		if(btn.eq(i).hasClass("to")){
-			ind = i;
-			break;
+		if(val < 36){
+			$(".system__ss").val(val + 1);
+		} else {
+			$(".system__ss").val(2);
+		};
+	} else if(way === "smaller"){
+		if(val === 0){
+			$(".system__ss").val(2);
+			return 0;
+		};
+
+		if(val > 2){
+			$(".system__ss").val(val - 1);
+		} else {
+			$(".system__ss").val(36);
 		};
 	};
-
-	$(".to").removeClass("to");
-
-	if(way > 0){
-		ind = ind + 1 !== btn.length ? ind + 1 : 0;
-	} else {
-		ind = ind !== 0 ? ind - 1 : btn.length - 1;
-	};
-
-	btn.eq(ind).addClass("to");
 };
 
 function checkSystem(num, ss){
@@ -198,7 +199,7 @@ function checkSystem(num, ss){
 	ss--;
 
 	for(let i = 0; i < num.length; i++){
-		if(+toNum(num[i]) > ss && num[i] !== "." && num[i] !== "-"){
+		if(toNum(num[i]) > ss && num[i] !== "." && num[i] !== "-"){
 			return [false, i];
 		};
 	};
@@ -209,13 +210,39 @@ function checkSystem(num, ss){
 // document.addEventListener("contextmenu", function(e){
 // 	e.preventDefault();
 // });
+document.addEventListener("keydown", function(e){
+	if(e.ctrlKey && !e.shiftKey){
+		if(e.key === "ArrowUp"){
+			e.preventDefault();
+			firstChange("bigger");
+		} else if(e.key === "ArrowDown"){
+			e.preventDefault();
+			firstChange("smaller");
+		};
+	};
+	if(e.ctrlKey && e.shiftKey){
+		if(e.key === "ArrowUp"){
+			e.preventDefault();
+			secondChange("bigger");
+		} else if(e.key === "ArrowDown"){
+			e.preventDefault();
+			secondChange("smaller");
+		};
+	};
+});
+
+document.addEventListener("keyup", function(e){
+	if(e.ctrlKey && !e.shiftKey && (e.key.toLowerCase() === "arrowleft" || e.key.toLowerCase() === "arrowright")){
+		replace();
+	};
+});
 
 $("*").on('dragstart',function(e) { 
 	e.preventDefault();;
 });
 $("input").on("paste", function(e){
-	var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;
-	var pastedData = clipboardData.getData('text');
+	let clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;
+	let pastedData = clipboardData.getData('text');
 
 	if(this.classList.contains("counting__ss")){
 		if((this.value + pastedData).length > maxSS){
@@ -226,25 +253,24 @@ $("input").on("paste", function(e){
 		for(let i = 0; i < pastedData.length; i++){
 			if(!trueChars.includes(pastedData[i])){
 				e.preventDefault();
-				error([`Вставлено несовместное значение <b>${pastedData}</b> с ошибкой на <b>${i}-ом</b> символе`], false);
+				error([`Вставлено несовместное значение <b>${pastedData}</b> с ошибкой на <b>${i}</b> символе (по счёту слева)`], false);
 				return 0;
 			};
 		};
 	} else {
-		if((this.value + pastedData).length > maxVal){ 
+		if((this.value + pastedData).length > maxVal){
 			e.preventDefault();
 			error([`Итоговое значение <b>${this.value + pastedData}</b> превышает допустимый предел длины <b>${maxVal}</b>`], false);
 			return 0;
 		};
 		for(let i = 0; i < pastedData.length; i++){
-			if(!trueChars.includes(pastedData[i]) && !symbolChars.includes(pastedData[i])){
+			if(!trueChars.includes(pastedData[i]) && !symbolChars.includes(pastedData[i].toLowerCase())){
 				e.preventDefault();
-				error([`Вставлено несовместное значение <b>${pastedData}</b> с ошибкой на <b>${i}-ом</b> символе`], false);
+				error([`Вставлено несовместное значение <b>${pastedData}</b> с ошибкой на <b>${i}</b> символе (по счёту слева)`], false);
 				return 0;
 			};
 		};
 	};
-
 });
 
 function errorShow(text, deleteVal){
@@ -279,17 +305,11 @@ function error(text = ["Произошла ошибка"], deleteVal = true){
 	};
 };
 
-// error(["Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Знаках выйти напоивший приставка она семь lorem силуэт всеми вопроса взобравшись необходимыми, залетают рекламных живет безопасную дорогу несколько обеспечивает, до.", "Далеко-далеко за словесными горами в стране гласных и согласных живут, рыбные тексты. За вскоре рекламных родного меня ее заголовок безорфографичный собрал деревни.", "Далеко-далеко за словесными горами в стране гласных, и согласных живут рыбные тексты. От всех его, необходимыми ручеек коварный себя!"])
-
 function toNum(char){
 	char = char.toLowerCase();
-	switch(char){
-		case "a" : return 10;
-		case "b" : return 11;
-		case "c" : return 12;
-		case "d" : return 13;
-		case "e" : return 14;
-		case "f" : return 15;
+
+	if(symbolChars.indexOf(char) !== -1){
+		char = symbolChars.indexOf(char) + 10;
 	};
 
 	char = +char;
@@ -299,16 +319,10 @@ function toNum(char){
 
 function toChar(num){
 	let res = num;
+	num = +num;
 
 	if(num >= 10){
-		switch(num){
-			case 10 : res = "A"; break;
-			case 11 : res = "B"; break;
-			case 12 : res = "C"; break;
-			case 13 : res = "D"; break;
-			case 14 : res = "E"; break;
-			case 15 : res = "F"
-		};
+		res = symbolChars[num - 10].toUpperCase();
 	};
 
 	return res;
@@ -336,6 +350,7 @@ function toAnother(val, from, to){
 
 function to10(val, ss){
 	let num = 0, step = 0;
+	val += "";
 	for(let i = val.length - 1; i >= 0; i--){
 		num += +toNum(val[i]) * ss**step;
 		step++;
@@ -376,16 +391,12 @@ function lockKey(e, length, maxLength, symbols){
 	};
 };
 
-$("#main-system").on("keydown", function(e){
+$("#main-system, .counting__ss, #from, #to").on("keydown", function(e){
 	lockKey(e, this.value.length, maxSS, false);
 });
 
-$(".counting__num").on("keydown", function(e){
+$(".counting__num, .table__input").on("keydown", function(e){
 	lockKey(e, this.value.length, maxVal, true);
-});
-
-$(".counting__ss").on("keydown", function(e){
-	lockKey(e, this.value.length, maxSS, false);
 });
 
 $("#act").on("keydown", function(e){
@@ -462,6 +473,11 @@ function deleteZero(str){
 };
 
 function decimal(num, ss){
+	if((num + "").indexOf("e+") !== -1){
+		error([`Число <b>${num}<sub>${ss}</sub></b> перешло рамки длины`], false);
+		return 0;
+	};
+
 	let systemValid = checkSystem(num, ss);
 
 	if(!systemValid[0]){
@@ -490,6 +506,11 @@ function decimal(num, ss){
 
 // Перевод дроби из 10 в какую-либо
 function decimalOut(num, to){
+	if((num + "").indexOf("e+") !== -1){
+		error([`Число <b>${num}<sub>10</sub></b> перешло рамки длины`], false);
+		return 0;
+	};
+
 	let systemValid = checkSystem(num, 10);
 
 	if(!systemValid[0]){
@@ -543,34 +564,34 @@ function count(){
 	if(!act){errorMessage.push("Введите действие между числами (<b>+ - * :</b>).");};
 	if(!ss1){errorMessage.push(`Введите систему счистления у <b>1-ого</b> числа <b>${num1}<sub>${ss1}</sub></b>.`);};
 	if(!ss2){errorMessage.push(`Введите систему счистления у <b>2-ого</b> числа <b>${num1}<sub>${ss1}</sub></b>.`);};
-	if(+ss1 > 16 || +ss2 > 16 || +ss > 16 || +ss1 < 2 || +ss2 < 2 || +ss < 2){
-		errorMessage.push("Выберите систему счистления в диапозоне от <b>2</b> до <b>16</b> включительно.");
+	if(+ss1 > 36 || +ss2 > 36 || +ss > 36 || +ss1 < 2 || +ss2 < 2 || +ss < 2){
+		errorMessage.push("Выберите систему счистления в диапозоне от <b>2</b> до <b>36</b> включительно.");
 	};
 	if(!valid1[0]){
-		errorMessage.push(`Ошибка соответсвия <b>1-ого</b> числа <b>${num1}<sub>${ss1}</sub></b> и его системы счистления на <b>${valid1[1] + 1}-ом</b> символе.`);
+		errorMessage.push(`Ошибка соответсвия <b>1-ого</b> числа <b>${num1}<sub>${ss1}</sub></b> и его системы счистления на <b>${valid1[1] + 1}</b> символе (по счёту слева).`);
 	};
 	if(!valid2[0]){
-		errorMessage.push(`Ошибка соответсвия <b>2-ого</b> числа <b>${num2}<sub>${ss2}</sub></b> и его системы счистления на <b>${valid2[1] + 1}-ом</b> символе.`);
+		errorMessage.push(`Ошибка соответсвия <b>2-ого</b> числа <b>${num2}<sub>${ss2}</sub></b> и его системы счистления на <b>${valid2[1] + 1}</b> символе (по счёту слева).`);
 	};
 	if(num1 === "."){errorMessage.push(`Введено бессмысленное значение в <b>1-ом</b> поле ввода`);};
 	if(num2 === "."){errorMessage.push(`Введено бессмысленное значение во <b>2-ом</b> поле ввода`);};
 	if(num1.length > maxVal){
-		errorMessage.push(`Число <b>${num1}<sub>${ss1}</sub></b> слишком большое по длине, введите значение короче <b>${maxVal + 1}-и символов</b>.`);
+		errorMessage.push(`Число <b>${num1}<sub>${ss1}</sub></b> слишком большое по длине, введите значение короче <b>${maxVal + 1}</b> символов.`);
 	};
 	if(num2.length > maxVal){
-		errorMessage.push(`Число <b>${num2}<sub>${ss2}</sub></b> слишком большое по длине, введите значение короче <b>${maxVal + 1}-и сиволов</b>.`);
+		errorMessage.push(`Число <b>${num2}<sub>${ss2}</sub></b> слишком большое по длине, введите значение короче <b>${maxVal + 1}</b> сиволов.`);
 	};
 	if(ss1.length > maxSS){
-		errorMessage.push(`Система счисления <b>${ss1}</b> слишком большая по длине, введите значение короче <b>${maxSS + 1}-ёх</b>.`);
+		errorMessage.push(`Система счисления <b>${ss1}</b> слишком большая по длине, введите значение короче <b>${maxSS + 1}</b> символов.`);
 	};
 	if(ss2.length > maxSS){
-		errorMessage.push(`Система счисления <b>${ss2}</b> слишком большая по длине, введите значение короче <b>${maxSS + 1}-ёх</b>.`);
+		errorMessage.push(`Система счисления <b>${ss2}</b> слишком большая по длине, введите значение короче <b>${maxSS + 1}</b> символов.`);
 	};
 	if(ss.length > maxSS){
-		errorMessage.push(`Система счисления <b>${ss}</b> слишком большая по длине, введите значение короче <b>${maxSS + 1}-ёх</b>.`);
+		errorMessage.push(`Система счисления <b>${ss}</b> слишком большая по длине, введите значение короче <b>${maxSS + 1}</b> символов.`);
 	};
 	if(num2.length > maxVal){
-		errorMessage.push(`Число <b>${num2}<sub>${ss2}</sub></b> слишком большое по длине, введите значение короче <b>${maxVal}-и</b>.`);
+		errorMessage.push(`Число <b>${num2}<sub>${ss2}</sub></b> слишком большое по длине, введите значение короче <b>${maxVal}</b> символов.`);
 	};
 	if(charLength(num1, ".", false) + charLength(num1, ",", false) > 1){
 		errorMessage.push(`Ошибка при вводе дробного значения в <b>1-ом</b> числе <b>${num1}<sub>${ss1}</sub></b>.`);
@@ -578,8 +599,14 @@ function count(){
 	if(charLength(num2, ".", false) + charLength(num2, ",", false) > 1){
 		errorMessage.push(`Ошибка при вводе дробного значения во <b>2-ом</b> числе <b>${num2}<sub>${ss2}</sub></b>.`);
 	};
-	if(+num2 === 0 && act === "/" || act === ":"){
+	if(+num2 === 0 && (act === "/" || act === ":")){
 		errorMessage.push(`Ошибка ввода делителя, равного <b>${num2}<sub>${ss2}</sub></b>.`);
+	};
+	for(let i = 0; i < num1.length; i++){
+		if(!trueChars.includes(num1[i]) && !symbolChars.includes(num1[i].toLowerCase())){
+			errorMessage.push(`Введено бессмысленное значение в поле ввода с нечитаемым символом на <b>${i + 1}</b> символе (по счёту слева).`);
+			break;
+		};
 	};
 
 	if(errorMessage.length !== 0){
@@ -587,17 +614,10 @@ function count(){
 		return 0;
 	};
 
-	clearTimeout(rotateTimeout);
-	$(".counting__logo-oracle").addClass("rotated");
-	rotateTimeout = setTimeout(function(){
-		$(".counting__logo-oracle").removeClass("rotated");
-	}, 500);
-
-
 	let
 		num1In10 	= +num1,
 		num2In10 	= +num2,
-		res 			= 0;
+		res 			= 0n;
 
 	num1 = deleteZero(num1).replaceAll(",", ".");
 	num2 = deleteZero(num2).replaceAll(",", ".");
@@ -632,6 +652,11 @@ function count(){
 		res = +toFixed((num1In10 / num2In10), 8);
 	};
 
+	if((res + "").indexOf("e+") !== -1){
+		error([`Число <b>${res}<sub>10</sub></b> перешло рамки длины`], false);
+		return 0;
+	};
+
 	if(+ss !== 10 && res !== 0){
 		let lowerZero = res < 0;
 
@@ -651,6 +676,12 @@ function count(){
 	};
 
 	res = deleteZero(res);
+
+	clearTimeout(rotateTimeout);
+	$(".counting__logo-oracle").addClass("rotated");
+	rotateTimeout = setTimeout(function(){
+		$(".counting__logo-oracle").removeClass("rotated");
+	}, 500);
 
 	document.getElementById("count-value").innerHTML = `<span>${res}</span><sub>${ss}</sub>`;
 };
@@ -676,9 +707,6 @@ $(".input-count, .counting__ss").on("keyup", function(e){
 			},300);
 		};
 	};
-	if(e.ctrlKey && !e.shiftKey && (e.key.toLowerCase() === "arrowleft" || e.key.toLowerCase() === "arrowright")){
-		replace();
-	};
 	// if(e.key === "Tab"){
 	// 	e.preventDefault();
 	// 	if(!e.shiftKey){
@@ -696,13 +724,21 @@ $("#replace").on("click", replace);
 
 $("#count").on("click", count);
 
+$("#clean").on("click", function(){
+	$(".input-count, .counting__ss").val("");
+});
+
 window.addEventListener("unload", function(){
-	localStorage.setItem("from", $(".from").children("span").text());
-	localStorage.setItem("to", $(".to").children("span").text());
-	if(inp.value !== ""){
-		localStorage.setItem("val", inp.value)
-	};
-	if(result.innerText !== ""){
-		localStorage.setItem("out", result.innerHTML)
-	};
+	localStorage.setItem("from", $("#from").val());
+	localStorage.setItem("to", $("#to").val());
+	localStorage.setItem("small", document.querySelector(".table__end-block").classList.contains("small-text"));
+	localStorage.setItem("val", inp.value)
+	localStorage.setItem("out1", result.innerHTML)
+	localStorage.setItem("num1", $("#num_1").val());
+	localStorage.setItem("ss1", $("#ss_1").val());
+	localStorage.setItem("num2", $("#num_2").val());
+	localStorage.setItem("ss2", $("#ss_2").val());
+	localStorage.setItem("act", $("#act").val());
+	localStorage.setItem("main-ss", $("#main-system").val());
+	localStorage.setItem("out2", $("#count-value").html());
 });
