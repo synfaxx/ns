@@ -13,7 +13,6 @@ let
 if(localStorage.getItem("small") === "true"){
 	document.querySelector(".table__end-block").classList.add("small-text");
 };
-
 if(localStorage.getItem("val")){			inp.value = localStorage.getItem("val");			};
 if(localStorage.getItem("out1")){		result.innerHTML = localStorage.getItem("out1");};
 if(localStorage.getItem("from")){		$("#from").val(localStorage.getItem("from"));	};
@@ -24,6 +23,11 @@ if(localStorage.getItem("num2")){		$("#num_2").val(localStorage.getItem("num2"))
 if(localStorage.getItem("ss2")){			$("#ss_2").val(localStorage.getItem("ss2"));		};
 if(localStorage.getItem("act")){			$("#act").val(localStorage.getItem("act"));		};
 if(localStorage.getItem("main-ss")){	$("#main-system").val(localStorage.getItem("main-ss"));};
+
+for(let i = 0; i < document.getElementsByTagName("input").length; i++){
+	if($("input").eq(i).val())
+		$("input").eq(i).next(".input-name").addClass("hide");
+};
 
 
 function start(){
@@ -45,10 +49,16 @@ function start(){
 	if(val === ""){
 		errorMessage.push("Введите значение.");
 	};
+	if(from === 0){
+		errorMessage.push("Введите систему счистления у значения.");
+	};
+	if(to === 0){
+		errorMessage.push("Введите систему счистления у результата.");
+	};
 	if(charLength(val, ",", false) + charLength(val, ".", false) > 1){
 		errorMessage.push(`Ошибка при вводе дробного значения в числе <b>${val}<sub>${from}</sub></b>.`);
 	};
-	if(from < 2 || from > 36 || to < 2 || to > 36){
+	if((from < 2 || from > 36 || to < 2 || to > 36) && from === "" && to === ""){
 		errorMessage.push("Выбери систему счистления в диапозоне от <b>2</b> до <b>36</b> включительно.");
 	};
 	if(val === "."){errorMessage.push(`Введено бессмысленное значение в поле ввода.`);}
@@ -358,6 +368,19 @@ function to10(val, ss){
 	return num;
 };
 
+let focusElement;
+
+$("input").on("focus", function(){
+	focusElement = $(this);
+
+	$(this).next(".input-name").addClass("hide");
+
+	$(this).on("blur", function(){
+		if(!$(this).val())
+			$(this).next(".input-name").removeClass("hide");
+	});
+});
+
 $(".table__in-block .system__button").on("click", function(){
 	$(".from").removeClass("from");
 	$(this).addClass("from");
@@ -370,6 +393,16 @@ $(".table__out-block .system__button").on("click", function(){
 
 $(".button").on("click", function(){
 	$("#in").focus();
+});
+
+$(".counting__button").on("click", function(e){
+	if(focusElement && focusElement.parent().attr("class").indexOf("counting__") !== -1){
+		focusElement.focus();
+	};
+});
+
+$(".input-name").on("click", function(){
+	$(this).prev("input").focus();
 });
 
 $(".table__button").on("click", start);
