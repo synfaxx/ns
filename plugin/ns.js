@@ -1,7 +1,7 @@
 /*
 	© Copyright 2021 synfaxx503
 
-	NS Plugin was created for instantly working with number systems.
+	NS Plugin 2.0.0 was created for instantly working with number systems.
 	You can download this code and include in your site.
 
 	use the function "convertValFromTo" to convert value to necessary number.
@@ -11,33 +11,26 @@
 	The third argument is number system of end value;
 
 	Program is return end value.
-	   ___ _ _   _   _      ___ _ _   _   _
-	| | | | | | | | | |  | | | | | | | | | |
-	| | | | | | | | | |  | | | | | | | | | |
-	|_| | | | | |_|_|_|  |_| | | | | |_|_|_|
-	| | | | | | | | |    | | | | | | | | |
-	|_| |_|  _|_|_|_|_   |_| |_|  _|_|_|_|_
-	| | | | | |  |  | |  | | | | | |  |  | |
-	| | |_  |_   |  |_   | | |_  |_   |  |_
-	|     |   |  |    |  |     |   |  |    |
-	| | | | | |  |  | |  | | | | | |  |  | |
-	|_| |_| |_|__|  |_|  |_| |_| |_|__|  |_|
-	   ___ _ _   _   _      ___ _ _   _   _
-	| | | | | | | | | |  | | | | | | | | | |
-	| | | | | | | | | |  | | | | | | | | | |
-	|_| | | | | |_|_|_|  |_| | | | | |_|_|_|
-	| | | | | | | | |    | | | | | | | | |
-	|_| |_|  _|_|_|_|_   |_| |_|  _|_|_|_|_
-	| | | | | |  |  | |  | | | | | |  |  | |
-	| | |_  |_   |  |_   | | |_  |_   |  |_
-	|     |   |  |    |  |     |   |  |    |
-	| | | | | |  |  | |  | | | | | |  |  | |
-	|_| |_| |_|__|  |_|  |_| |_| |_|__|  |_|
+	    _____ __ __ __    __ 
+	|  |  |  |  |  |  |  |  |
+	|  |  |  |  |  |  |  |  |
+	|  |  |  |  |  |  |  |  |
+	|__|  |  |  |  |__|__|__|
+	|  |  |  |  |  |  |  |   
+	|  |  |  |  |  |  |  |   
+	|__|  |__   |__|__|__|__ 
+	|  |  |  |  |  |  |  |  |
+	|  |  |  |  |  |  |  |  |
+	|  |  |__   |__   |  |__
+	|        |     |  |     |
+	|  |  |  |  |  |  |  |  |
+	|  |  |  |  |  |  |  |  |
+	|__|  |__|  |__|__|  |__|
 */
 
 let
 	// Принятые во всех системах счистления символы
-	trueChars  			= ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", ","],
+	trueChars  			= ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."],
 
 	// Буквы, принятые для систем счисления 11+
 	symbolChars = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m","n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
@@ -55,6 +48,12 @@ function checkSystem(num, ss){
 	// Пробег по всем символам строки с их проверкой
 	for(let i = 0; i < num.length; i++){
 		if(toNum(num[i]) > ss && num[i] !== "." && num[i] !== "-"){
+			return [false, i];
+		};
+	};
+
+	for(let i = 0; i < num.length; i++){
+		if(!trueChars.includes(num[i]) && !symbolChars.includes(num[i])){
 			return [false, i];
 		};
 	};
@@ -86,25 +85,6 @@ function toNum(char){
 	return char;
 };
 
-// Функция перевода двузначного число в букву или возврат этой цифры
-function toChar(num){
-
-	// Инициализация переменной для вывода и присвоение ей параметра
-	let res = num;
-
-	// Проверка на тип числа и его трансформация при выполнении условия
-	if(typeof num !== "number"){
-		num = +num;
-	};
-
-	// Присвоение результату символ из массива букв при превышении значения 9
-	if(num >= 10){
-		res = symbolChars[num - 10].toUpperCase();
-	};
-
-	return res;
-};
-
 // Функция определения кол-во символов в строке по стогости
 function charCount(str, char = "", strong){
 
@@ -131,30 +111,6 @@ function charCount(str, char = "", strong){
 	};
 
 	return leng;
-
-};
-
-// Функция "отрезания" дробной части числа до определенной цифры
-function toFixed(num, val = -1){
-
-	// Преобразование типа в строку
-	num += "";
-
-	// Стаховка на случай передачи числа с запятой
-	num = num.replaceAll(",", ".");
-
-	// Позиция точки в числе
-	let pos = num.indexOf(".");
-
-	// Обрезание числа с первой цифры до позиции точки в случае обнаружения точки
-	if(pos !== -1){
-		num = num.substr(0, pos + ++val);
-	};
-
-	// Преобразование типа в число
-	num = +num;
-
-	return num;
 
 };
 
@@ -257,7 +213,7 @@ function convertValFromTo(val, from, to){
 	let valid = checkSystem(val, from), errorMessage = [];
 
 	// Замена всех символов "," на "." в значении
-	val 	= deleteZero(val.replaceAll(",", ".")).toLowerCase();
+	val = val.replaceAll(",", ".").toLowerCase();
 
 	// Проверка значения
 	if(!val || charCount(val, ".") > 1 || !valid[0] || val.length > 28){
@@ -291,86 +247,18 @@ function convertValFromTo(val, from, to){
 	};
 
 	if(to === 10){
-
 		return convertTo10(val, from) + "";
-
 	} else {
 
-		if(val.indexOf(".") !== -1){
-
-			// Результирующая переменная; Счётчик длины результата при счёте для создания определённого лимита
-			let res, limitLength = 0;
-
-			// Перевод числа в 10-чную систему счистления, если оно не соответствует ей
-			if(from !== 10){
-				console.log(val);
-				val = convertTo10(val, from);
-			};
-
-			// Проверка на величину целой части у числа
-			if(Math.floor(val) === 0){
-				res = "0."
-			} else {
-
-
-				// Присвоение целой части результата число в нужной системе счистления + "."
-				res = convertValFromTo(Math.floor(val), 10, to) + ".";
-
-				// Отнятие у аргумента дроби целую часть (для дальнейшего преобразования)
-				val -= Math.floor(val);
-
-				// Обрезание числа до 10 знаков после запятой
-				val = toFixed(val, 10);
-
-			};
-
-			// Начало преобразования дробной части результата
-			do {
-
-				// Умножение числа на нужную систему счистления с целью получения следующей цифры после запятой
-				val 	= val * to;
-
-				// Добажление целой части аргумента по порядку, преобразовывая числа > 9 в буквы
-				res 	+= toChar(Math.floor(val));
-
-				// Отнятие у аргумента дроби целую часть для дальнейшего умножения
-				val 	-= Math.floor(val)
-
-				// Подсчёт лимита длины
-				limitLength++;
-
-			// Работает до тех пор пока дробная часть аргумента не равна 0 и не превышен лимит
-			} while (val !== 0 && limitLength < 24);
-
-			return res;
-
-		} else {
-
-			let res = "";
-
-			// Преобразование типа в число
-			val = +val;
-
-			// Перевод числа в 10-чную систему счистления, если оно не соответствует ей
-			if(from !== 10){
-				val = convertTo10(val, from);
-			};
-
-			// Осуществление подсчёта результата
-			while (val > 0){
-				if(to > 9){
-					res += toChar(val % to);
-				} else {
-					res += val % to
-				};
-				val = Math.floor(val / to);
-			};
-
-			// Реверсирование строки
-			res = res.split("").reverse().join("")
-
-			return res;
-
+		// Перевод числа в 10-чную систему счистления, если оно не соответствует ей
+		if(from !== 10){
+			val = convertTo10(val, from);
 		};
+
+		if(typeof val !== "number"){
+			val = +val;
+		};
+
+		return val.toString(to);
 	};
 };
